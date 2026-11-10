@@ -1,0 +1,37 @@
+# Тема: exit code, failed step, skipped step, always().
+# По умолчанию успешен; для красного статуса включите fail_demo при ручном запуске.
+name: '02 — Exit code and failure'
+
+on:
+  workflow_dispatch:
+    inputs:
+      fail_demo:
+        description: 'Намеренно завершить шаг с кодом 1?'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  exit-codes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Успешная команда
+        run: |
+          echo 'exit 0 means success'
+          exit 0
+
+      - name: Намеренная ошибка (по флажку)
+        if: ${{ inputs.fail_demo }}
+        run: |
+          echo 'exit 1 means failure'
+          exit 1
+
+      - name: При ошибке предыдущего шага будет пропущен
+        run: echo 'Runs only if previous steps succeeded'
+
+      - name: Выполняется даже при ошибке
+        if: ${{ always() }}
+        run: echo 'This is an always() step'
