@@ -1,37 +1,41 @@
-# Тема: exit code, failed step, skipped step, always().
-# По умолчанию успешен; для красного статуса включите fail_demo при ручном запуске.
-name: '02 — Exit code and failure'
+# Тема: файл из job A не оказывается в job B сам по себе.
+# Upload/Download Artifact — перенос результата и скачивание его с вкладки Actions.
+name: '06 — Artifacts between jobs'
 
 on:
   workflow_dispatch:
-    inputs:
-      fail_demo:
-        description: 'Намеренно завершить шаг с кодом 1?'
-        required: true
-        type: boolean
-        default: false
 
 permissions:
   contents: read
 
 jobs:
-  exit-codes:
+  create-artifact:
     runs-on: ubuntu-latest
     steps:
-      - name: Успешная команда
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Сформировать отчёт
+        run: python scripts/create_report.py
+      - name: Сохранить артефакт в GitHub
+        uses: actions/upload-artifact@v7
+        with:
+          name: lesson-report
+          path: dist/report.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  consume-artifact:
+    needs: create-artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Скачать артефакт из предыдущей job
+        uses: actions/download-artifact@v8
+        with:
+          name: lesson-report
+          path: received
+      - name: Показать содержимое
         run: |
-          echo 'exit 0 means success'
-          exit 0
-
-      - name: Намеренная ошибка (по флажку)
-        if: ${{ inputs.fail_demo }}
-        run: |
-          echo 'exit 1 means failure'
-          exit 1
-
-      - name: При ошибке предыдущего шага будет пропущен
-        run: echo 'Runs only if previous steps succeeded'
-
-      - name: Выполняется даже при ошибке
-        if: ${{ always() }}
-        run: echo 'This is an always() step'
+          ls -l received/
+          cat received/report.txt
