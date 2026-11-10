@@ -1,0 +1,36 @@
+# Тема: CI — тесты на push и pull_request; Actions автоматически сообщает статус.
+name: '04 — Python tests (CI)'
+
+on:
+  push:
+    paths:
+      - 'calculator.py'
+      - 'tests/**'
+      - '.github/workflows/04-python-tests.yml'
+  pull_request:
+    paths:
+      - 'calculator.py'
+      - 'tests/**'
+      - '.github/workflows/04-python-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Скачать исходники в рабочую директорию
+        uses: actions/checkout@v7
+
+      - name: Подготовить конкретную версию Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Проверить версию
+        run: python --version
+
+      - name: Запустить unit-тесты
+        run: python -m unittest discover -s tests -v
