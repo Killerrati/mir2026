@@ -1,0 +1,29 @@
+name: '01 — Hello, runner!'
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  explore-runner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Привет
+        run: echo 'Hello from GitHub Actions!'
+
+      - name: Где выполняется этот код?
+        run: |
+          echo "hostname: $(hostname)"
+          echo "user: $(whoami)"
+          echo "working directory: $(pwd)"
+          uname -a
+
+      - name: Переменные окружения CI
+        run: |
+          echo "GITHUB_REPOSITORY=$GITHUB_REPOSITORY"
+          echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
+          echo "RUNNER_OS=$RUNNER_OS"
